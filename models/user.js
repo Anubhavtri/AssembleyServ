@@ -26,6 +26,14 @@ const UserSchema = Schema({
         type: Number,
         default: 0
     },
+    device_token: {
+        type: String,
+        default: ""
+    },
+    platform: {
+        type: String,
+        default: ""
+    },
     created_at: {
         type: Date,
         default: Date.now

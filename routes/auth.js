@@ -24,4 +24,10 @@ module.exports = (router, app) => {
                 res.status(status).json({ message: message, data: data });
             })
         })
+    router.route('/customer-notification')
+        .post((req, res) => {
+            authController.sendNotificationToCustomers(req, (status, message, data) => {
+                res.status(status).json({ message: message, data: data });
+            })
+        })
 }
