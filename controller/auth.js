@@ -1,13 +1,13 @@
 const db = require('../config/db')
 const FCM = require('fcm-node')
-const fcm = new FCM('AAAAK8JX6xY:APA91bEmIB3GlWT1Wrn4ZRqfNu-Vp5bm4JpGzYGaRaf7dKvE3xtVElorJVXIZpwQRah4qM7ehEIVlM98HzQMV7ECqJRv_UA5JVlZTWi9cOSKKlSRGF-TTkPVOkCCmyuopPG47qOj_hN2');
+const fcm = new FCM('AAAAErYwE8A:APA91bFLtFKA3V5cf0QQroy-jYoLM6jOYPY95vHDfOhv-YUxE91FzsvDdvdUoHIkwOPNPujxXDf7Xxk4pvo7jx1giznYBoGknnJ4oc8CW3c5yKGbevALtu2SAWcpL5XM_GfOJOzowAMK');
 module.exports = {
     login: async (req, callback) => {
         try {
             let user = req.body;
             if (user.mobileNo.toString().length == 10) {
                 let existUser = await db['user'].findOne({ mobileNo: user.mobileNo });
-                console.log(existUser)
+                console.log(!existUser.platform ,!existUser.device_token)
                 if (!existUser.platform || !existUser.device_token) {
                     let tempObj = {}
                     tempObj.platform = user.platform;
