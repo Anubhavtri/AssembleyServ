@@ -20,9 +20,11 @@ var onerror = function (error, callback) {
 };
 
 const user = require('../models/user');
+const notification = require('../models/notifications');
 
 mongoose.Promise = global.Promise;
 module.exports.db = db;
 module.exports = {
-    user
+    user,
+    notification
 }

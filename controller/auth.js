@@ -7,18 +7,18 @@ module.exports = {
             let user = req.body;
             if (user.mobileNo.toString().length == 10) {
                 let existUser = await db['user'].findOne({ mobileNo: user.mobileNo });
-                console.log(!existUser.platform ,!existUser.device_token)
+                console.log(!existUser.platform, !existUser.device_token)
                 if (!existUser.platform || !existUser.device_token) {
                     let tempObj = {}
                     tempObj.platform = user.platform;
                     tempObj.device_token = user.device_token;
                     db['user'].findByIdAndUpdate(existUser.id, tempObj)
-                    .then(user => {
-                        callback(200, "Login Successful", user)
-                    })
-                    .catch(error => {
-                        callback(500, error.message, error)
-                    })
+                        .then(user => {
+                            callback(200, "Login Successful", user)
+                        })
+                        .catch(error => {
+                            callback(500, error.message, error)
+                        })
                 }
                 else if (existUser) {
                     callback(200, "Login Successful", existUser)
@@ -95,6 +95,11 @@ module.exports = {
             let messageToSendTitle = req.body.messageToSendTitle
             var message = {};
 
+            const newNotification = new db['notification']({
+                title: messageToSendTitle,
+                message: messageToSend
+            });
+            newNotification.save()
             if (regTokens && regTokens.length) {
                 message = {
                     registration_ids: regTokens,
@@ -137,6 +142,15 @@ module.exports = {
             callback(200, "Successfully sent", {});
         } catch (error) {
             console.error(error);
+            callback(500, error.message, error);
+        }
+    },
+    getSentNotifications: async (req, callback) => {
+        try {
+            let notifications = await db['notification'].find({});
+            callback(200, "Notifications", notifications);
+        } catch (error) {
+            console.log(error);
             callback(500, error.message, error);
         }
     }
