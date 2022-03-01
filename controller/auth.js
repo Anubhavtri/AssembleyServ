@@ -7,21 +7,22 @@ module.exports = {
             let user = req.body;
             if (user.mobileNo.toString().length == 10) {
                 let existUser = await db['user'].findOne({ mobileNo: user.mobileNo });
-                console.log(!existUser.platform, !existUser.device_token)
-                if (!existUser.platform || !existUser.device_token) {
-                    let tempObj = {}
-                    tempObj.platform = user.platform;
-                    tempObj.device_token = user.device_token;
-                    db['user'].findByIdAndUpdate(existUser.id, tempObj)
-                        .then(user => {
-                            callback(200, "Login Successful", user)
-                        })
-                        .catch(error => {
-                            callback(500, error.message, error)
-                        })
-                }
-                else if (existUser) {
-                    callback(200, "Login Successful", existUser)
+                // console.log(!existUser.platform, !existUser.device_token)
+                if (existUser) {
+                    if (!existUser.platform || !existUser.device_token) {
+                        let tempObj = {}
+                        tempObj.platform = user.platform;
+                        tempObj.device_token = user.device_token;
+                        db['user'].findByIdAndUpdate(existUser.id, tempObj)
+                            .then(user => {
+                                callback(200, "Login Successful", user)
+                            })
+                            .catch(error => {
+                                callback(500, error.message, error)
+                            })
+                    } else {
+                        callback(200, "Login Successful", existUser)
+                    }
                 } else {
                     const newUser = new db['user'](req.body);
                     newUser.mobileNo = user.mobileNo;
