@@ -34,6 +34,14 @@ const UserSchema = Schema({
         type: String,
         default: ""
     },
+    bus_number: {
+        type: String,
+        default: ""
+    },
+    school_code: {
+        type: String,
+        default: ""
+    },
     created_at: {
         type: Date,
         default: Date.now

@@ -20,11 +20,15 @@ var onerror = function (error, callback) {
 };
 
 const user = require('../models/user');
+const access_token = require('../models/access_token');
+const refresh_token = require('../models/refresh_token');
 const notification = require('../models/notifications');
 
 mongoose.Promise = global.Promise;
 module.exports.db = db;
 module.exports = {
     user,
-    notification
+    notification,
+    access_token,
+    refresh_token
 }
