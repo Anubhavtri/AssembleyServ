@@ -307,6 +307,14 @@ module.exports = {
             let access = await db['user'].findById(req.user);
             if (access.role == 2) {
                 if (access.school_code == req.body.school_code && access.bus_number == req.body.bus_number) {
+                    if (req.body.lat) {
+                        access.lat = req.body.lat;
+                    }
+                    if (req.body.long) {
+                        access.long = req.body.long;
+                    }
+                    await access.save();
+
                     let query = {
                         role: 1,
                         platform: 'android',
