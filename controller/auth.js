@@ -239,7 +239,7 @@ module.exports = {
     sendNotificationToCustomers: async (req, callback) => {
         try {
             let query = {
-                role: 2,
+                role: 1,
                 platform: 'android'
             }
             let android_users = await db['user'].find(query);
