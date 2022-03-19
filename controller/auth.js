@@ -398,7 +398,7 @@ module.exports = {
         try {
             let driverSession = await db['user'].findById(req.user);
             driverSession.isSessionActive = false;
-            callback(200, "Session ended successfully", notifications);
+            callback(200, "Session ended successfully", driverSession);
         } catch (error) {
             console.log(error);
             callback(500, error.message, error);
