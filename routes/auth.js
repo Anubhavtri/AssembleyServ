@@ -61,4 +61,11 @@ module.exports = (router, app) => {
                 res.status(status).json({ message: message, data: data });
             })
         })
+
+    router.route('/end-driver-session')
+        .post(auth, (req, res) => {
+            authController.endDriverSession(req, (status, message, data) => {
+                res.status(status).json({ message: message, data: data });
+            })
+        })
 }

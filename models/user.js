@@ -42,6 +42,10 @@ const UserSchema = Schema({
         type: String,
         default: ""
     },
+    isSessionActive: {
+        type: Boolean,
+        default: false
+    },
     created_at: {
         type: Date,
         default: Date.now

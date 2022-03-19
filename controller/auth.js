@@ -144,7 +144,8 @@ module.exports = {
                 if (mobileValid != true) {
                     callback(400, mobileValid);
                 } else {
-                    if (await db['user'].findOne({ mobileNo: user.mobileNo })) {
+                    let userExist = await db['user'].findOne({ mobileNo: user.mobileNo })
+                    if (userExist && userExist.mobileNo == user.mobileNo) {
                         callback(400, 'User Already Exists');
                     } else {
                         let hashPassword = '';
@@ -211,8 +212,11 @@ module.exports = {
 
             let user = await db['user'].findOne({ id: req.user, school_code: school_code, bus_number: bus_number });
             if (user) {
-                let driver = await db['user'].findOne({ role: 2, school_code: school_code, bus_number: bus_number });
-                callback(200, "Driver's Lat Long", { lat: driver.lat, long: driver.long });
+                let driver = await db['user'].findOne({ role: 2, school_code: school_code, bus_number: bus_number, isSessionActive: true });
+                if (driver)
+                    callback(200, "Driver's Lat Long", { lat: driver.lat, long: driver.long });
+                else
+                    callback(200, "No Active Session Found", {});
             } else {
                 callback(400, "Please Check (School Code/Bus Number)", user);
             }
@@ -313,6 +317,7 @@ module.exports = {
                     if (req.body.long) {
                         access.long = req.body.long;
                     }
+                    access.isSessionActive = true;
                     await access.save();
 
                     let query = {
@@ -386,6 +391,16 @@ module.exports = {
 
         } catch (error) {
             console.error(error);
+            callback(500, error.message, error);
+        }
+    },
+    endDriverSession: async (req, callback) => {
+        try {
+            let driverSession = await db['user'].findById(req.user);
+            driverSession.isSessionActive = false;
+            callback(200, "Session ended successfully", notifications);
+        } catch (error) {
+            console.log(error);
             callback(500, error.message, error);
         }
     },
