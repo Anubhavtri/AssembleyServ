@@ -23,6 +23,9 @@ const user = require('../models/user');
 const access_token = require('../models/access_token');
 const refresh_token = require('../models/refresh_token');
 const notification = require('../models/notifications');
+const school = require('../models/school');
+const vehicle = require('../models/vehicle');
+const school_vehicle = require('../models/school_vehicle');
 
 mongoose.Promise = global.Promise;
 module.exports.db = db;
@@ -30,5 +33,8 @@ module.exports = {
     user,
     notification,
     access_token,
-    refresh_token
+    refresh_token,
+    school,
+    vehicle,
+    school_vehicle
 }
