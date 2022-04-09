@@ -148,22 +148,28 @@ module.exports = {
                     if (userExist && userExist.mobileNo == user.mobileNo) {
                         callback(400, 'User Already Exists');
                     } else {
-                        let hashPassword = '';
-                        hashPassword = await bcrypt.hash(user.password, bs.saltRounds);
+                        let driverExist = await db['user'].findOne({ school_code: user.school_code, bus_number: user.bus_number })
+                        if (driverExist) {
+                            callback(400, 'Driver Already Exists For this Bus');
+                        } else {
+                            let hashPassword = '';
+                            hashPassword = await bcrypt.hash(user.password, bs.saltRounds);
 
-                        const newUser = new db['user'](req.body);
-                        newUser.password = hashPassword;
-                        // newUser.email = user.email.toLowerCase()
-                        newUser.save()
-                            .then(async (userDetails) => {
+                            const newUser = new db['user'](req.body);
+                            newUser.password = hashPassword;
+                            // newUser.email = user.email.toLowerCase()
+                            newUser.save()
+                                .then(async (userDetails) => {
 
-                                callback(200, 'Sign-Up Successfull', { id: userDetails.id, mobileNo: userDetails.mobileNo, full_name: userDetails.full_name, lat: userDetails.lat, long: userDetails.long, bus_number: userDetails.bus_number, school_code: userDetails.school_code, ...createToken(userDetails.id, userDetails.role) });
-                            })
-                            .catch(err => {
-                                console.log(err);
-                                callback(500, 'error in saving user details');
-                            });
-                        // }
+                                    callback(200, 'Sign-Up Successfull', { id: userDetails.id, mobileNo: userDetails.mobileNo, full_name: userDetails.full_name, lat: userDetails.lat, long: userDetails.long, bus_number: userDetails.bus_number, school_code: userDetails.school_code, ...createToken(userDetails.id, userDetails.role) });
+                                })
+                                .catch(err => {
+                                    console.log(err);
+                                    callback(500, 'error in saving user details');
+                                });
+                            // }
+                        }
+
                     }
 
                 }
