@@ -149,7 +149,7 @@ module.exports = {
                         callback(400, 'User Already Exists');
                     } else {
                         let driverExist = await db['user'].findOne({role: 2, school_code: user.school_code, bus_number: user.bus_number })
-                        if (driverExist) {
+                        if (user.role == 2 && driverExist) {
                             callback(400, 'Driver Already Exists For this Bus');
                         } else {
                             let hashPassword = '';
