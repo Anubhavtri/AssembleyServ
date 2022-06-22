@@ -30,6 +30,8 @@ app.use(function (req, res, next) {
 
 app.use(cors(crossOption));
 
+app.use('/feeds', express.static('feeds'));
+
 
 require('./config/routes')(router, app);
 app.use(router);
