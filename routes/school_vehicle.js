@@ -3,11 +3,6 @@ const auth = require('../middleware/auth')
 module.exports = (router, app) => {
 
     router.route('/schools')
-        .post((req, res) => {
-            schoolController.insertSchool(req, (status, message, data) => {
-                res.status(status).json({ message: message, data: data });
-            })
-        })
         .get((req, res) => {
             schoolController.getAllSchools(req, (status, message, data) => {
                 res.status(status).json({ message: message, data: data });

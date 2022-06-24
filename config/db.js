@@ -26,6 +26,7 @@ const notification = require('../models/notifications');
 const school = require('../models/school');
 const vehicle = require('../models/vehicle');
 const school_vehicle = require('../models/school_vehicle');
+const feeds = require('../models/feeds');
 
 mongoose.Promise = global.Promise;
 module.exports.db = db;
@@ -36,5 +37,6 @@ module.exports = {
     refresh_token,
     school,
     vehicle,
-    school_vehicle
+    school_vehicle,
+    feeds
 }

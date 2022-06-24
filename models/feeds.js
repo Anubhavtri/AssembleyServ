@@ -25,9 +25,9 @@ const FeedsSchema = Schema({
         type: String,
         default: ""
     },
-    userId: {
+    schoolId: {
         type: Schema.Types.ObjectId,
-        ref: 'User'
+        ref: 'School'
     },
     created_at: {
         type: Date,

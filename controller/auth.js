@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const BcryptSalt = require('bcrypt-salt');
 const bs = new BcryptSalt();
 const crypto = require('crypto');
+const Role = require('../config/constant.js').Role
 
 
 createAccessToken = async (data, callback) => {
@@ -52,18 +53,29 @@ createRefreshToken = async (data, callback) => {
 createToken = (userId, role) => {
     const access_token = crypto.randomBytes(64).toString('hex');
     const refresh_token = crypto.randomBytes(64).toString('hex');
-    createAccessToken({
+    let access_token_obj = {
         token: access_token,
         expire_date: new Date(Date.now() + (300 * 24 * 3600000)).toString(),
         userId: userId,
-        client_id: null
-    })
-    createRefreshToken({
+        client_id: null,
+        role: role
+    }
+    let refresh_token_obj = {
         token: refresh_token,
         expire_date: new Date(Date.now() + (300 * 24 * 3600000)).toString(),
         userId: userId,
-        client_id: null
-    });
+        client_id: null,
+        role: role
+    }
+    // if(role == Role.management){
+    //     access_token_obj.schoolId = access_token_obj.userId;
+    //     delete access_token_obj.userId
+    //     refresh_token_obj.schoolId = refresh_token_obj.userId;
+    //     delete refresh_token_obj.userId
+    // }
+
+    createAccessToken(access_token_obj, role)
+    createRefreshToken(refresh_token_obj, role);
     return { access_token, refresh_token, userId, role }
 }
 
@@ -148,7 +160,7 @@ module.exports = {
                     if (userExist && userExist.mobileNo == user.mobileNo) {
                         callback(400, 'User Already Exists');
                     } else {
-                        let driverExist = await db['user'].findOne({role: 2, school_code: user.school_code, bus_number: user.bus_number })
+                        let driverExist = await db['user'].findOne({ role: 2, school_code: user.school_code, bus_number: user.bus_number })
                         if (user.role == 2 && driverExist) {
                             callback(400, 'Driver Already Exists For this Bus');
                         } else {
@@ -180,6 +192,103 @@ module.exports = {
             console.log(error);
             callback(500, error.message, error);
         }
+    },
+    insertSchool: async (req, callback) => {
+        try {
+            let user = req.body;
+
+            if (user.mobileNo) {
+                console.log(user.mobileNo);
+                var mobileValid = mobileNumberValidation(user.mobileNo);
+                if (mobileValid != true) {
+                    callback(400, mobileValid);
+                } else {
+                    let userExist = await db['school'].findOne({ mobileNo: user.mobileNo, school_code: user.school_code })
+                    if (userExist && userExist.mobileNo == user.mobileNo) {
+                        callback(400, 'School Already Exists');
+                    } else {
+
+                        let hashPassword = '';
+                        hashPassword = await bcrypt.hash(user.password, bs.saltRounds);
+
+                        const newUser = new db['school'](req.body);
+                        newUser.password = hashPassword;
+                        // newUser.email = user.email.toLowerCase()
+                        newUser.save()
+                            .then(async (userDetails) => {
+                                callback(200, 'Registration Successfull', { id: userDetails.id, mobileNo: userDetails.mobileNo, school_name: userDetails.school_name, school_address: userDetails.school_address, school_code: userDetails.school_code, is_active: userDetails.is_active, platform: userDetails.platform, device_token: userDetails.device_token, ...createToken(userDetails.id, userDetails.role) });
+                            })
+                            .catch(err => {
+                                console.log(err);
+                                callback(500, 'error in saving user details');
+                            });
+                    }
+                }
+            } else {
+                callback(500, 'Please enter a valid mobile number');
+            }
+        } catch (error) {
+            console.log(error);
+            callback(500, error.message, error);
+        }
+    },
+    schoolLogin: async (req, callback) => {
+        try {
+            let user = req.body;
+            if (user.grant_type && user.grant_type == "refresh") {
+                let refresh_token = await db['refresh_token'].findOne({ token: user.refresh_token })
+                // console.log("****************** refresh token ****************", refresh_token)
+                if (refresh_token) {
+                    let userEmail = await db['school'].findById(refresh_token.userId)
+                    let userDetails = {
+                        id: userEmail.id,
+                        mobileNo: userEmail.mobileNo,
+                        school_name: userEmail.school_name,
+                        school_address: userEmail.school_address,
+                        school_code: userEmail.school_code,
+                        is_active: userEmail.is_active,
+                        platform: userEmail.platform,
+                        device_token: userEmail.device_token,
+                        ...createToken(userEmail.id, userEmail.role)
+                    }
+
+                    callback(200, "Login Successfull", userDetails)
+                } else {
+                    callback(404, "Token Expired")
+                }
+            } else {
+                let userEmail = await db['school'].findOne({ mobileNo: user.mobileNo });
+                console.log(userEmail)
+                if (userEmail == null) {
+                    callback(404, 'Mobile Number ' + req.body.mobileNo + ' not found in db')
+                } else {
+                    if (user.password) {
+                        if (await bcrypt.compare(user.password, userEmail.password)) {
+                            let userDetails = {
+                                id: userEmail.id,
+                                mobileNo: userEmail.mobileNo,
+                                school_name: userEmail.school_name,
+                                school_address: userEmail.school_address,
+                                school_code: userEmail.school_code,
+                                is_active: userEmail.is_active,
+                                platform: userEmail.platform,
+                                device_token: userEmail.device_token,
+                                ...createToken(userEmail.id, userEmail.role)
+                            }
+                            callback(200, "Login Successfull", userDetails)
+                        } else {
+                            callback(404, "Invalide Credentials")
+                        }
+                    } else {
+                        callback(404, "Invalide Credentials")
+                    }
+                }
+            }
+        } catch (error) {
+            console.log(error);
+            callback(500, error.message, error);
+        }
+
     },
     updateLatLong: async (req, callback) => {
         try {

@@ -8,7 +8,22 @@ module.exports = (router, app) => {
             })
         })
 
+    router.route('/register-school')
+        .post((req, res) => {
+            authController.insertSchool(req, (status, message, data) => {
+                res.status(status).json({ message: message, data: data });
+            })
+        })
+
     router.route('/login')
+        .post((req, res) => {
+            console.log("try to login")
+            authController.login(req, (status, message, data) => {
+                res.status(status).json({ message: message, data: data });
+            })
+        })
+
+    router.route('/school-login')
         .post((req, res) => {
             console.log("try to login")
             authController.login(req, (status, message, data) => {

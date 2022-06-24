@@ -33,6 +33,7 @@ module.exports = {
     getAllSchools: async (req, callback) => {
         try {
             let schools = await db['school'].find({ is_active: true })
+            .select({ school_code: 1, school_name: 1, school_address: 1 })
             callback(200, "Schools", schools);
         } catch (error) {
             console.error(error);
