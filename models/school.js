@@ -38,6 +38,10 @@ const SchoolSchema = Schema({
         type: Boolean,
         default: true
     },
+    verification_otp: {
+        type: String,
+        default: ""
+    },
     created_at: {
         type: Date,
         default: Date.now

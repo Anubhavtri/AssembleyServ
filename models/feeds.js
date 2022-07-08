@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const { CommentSchema } = require("./comment")
 const FeedsSchema = Schema({
     title: {
         type: String,
@@ -29,6 +30,7 @@ const FeedsSchema = Schema({
         type: Schema.Types.ObjectId,
         ref: 'School'
     },
+    comments: [CommentSchema],
     created_at: {
         type: Date,
         default: Date.now

@@ -304,6 +304,20 @@ module.exports = {
             callback(500, error.message, error);
         }
     },
+    updateProfile: async (req, callback) => {
+        try {
+            db['user'].findByIdAndUpdate(req.params.userid, req.body)
+                .then(user => {
+                    callback(200, "Profile updated sucessfully")
+                })
+                .catch(error => {
+                    callback(500, error.message, error)
+                })
+        } catch (error) {
+            console.error(error);
+            callback(500, error.message, error);
+        }
+    },
     getLatLong: async (req, callback) => {
         try {
             let user = await db['user'].findById(req.params.userid);
@@ -528,5 +542,84 @@ module.exports = {
             console.log(error);
             callback(500, error.message, error);
         }
-    }
+    },
+    loginWithOTP: async (req, callback) => {
+        try {
+            let user = req.body;
+            if (user.mobileNo) {
+                if (user.role == 3) {
+                    otpUser = await db['school'].findOne({ mobileNo: req.body.mobileNo });
+                } else {
+                    otpUser = await db['user'].findOne({ mobileNo: req.body.mobileNo });
+                }
+
+                if (otpUser) {
+                    // let otp = Math.floor(1000 + Math.random() * 9000)
+
+                    let otp = 5005;
+                    let loginOtp = ""
+                    if (user.role == 3) {
+                        loginOtp = await db['school'].findByIdAndUpdate(otpUser.id, {
+                            verification_otp: otp
+                        })
+                    } else {
+                        loginOtp = await db['user'].findByIdAndUpdate(otpUser.id, {
+                            verification_otp: otp
+                        })
+                    }
+
+
+                    // console.log(loginOtp)
+                    console.log(otp)
+                    // let sendSms = await textlocalComplete.sendSms('N2E2Yjc5Mzc3MTcwNjY3MzMxNzU1YTc4NDc1NzRhMzA=', req.body.mobileNo, 'GoodXI',
+                    //     `Dear User, Your OTP for login to GoodX is ${otp}. Valid for 10 minutes. Please do not share this OTP. Regards, GoodX Team`);
+                    // console.log(sendSms.data)
+                    callback(200, "OTP Sent", otp)
+                } else {
+                    callback(404, "No user found")
+                }
+            } else {
+                callback(400, "Invalid Mobile Number")
+            }
+        } catch (error) {
+            console.log(error);
+            callback(500, error.message, error);
+        }
+    },
+    verifyOTP: async (req, callback) => {
+        try {
+            let verification_otp = null;
+            let otp = req.body.login_otp;
+
+            if (req.body.role == 3) {
+                verification_otp = await db['school'].findOne({ mobileNo: req.body.mobileNo });
+            } else {
+                verification_otp = await db['user'].findOne({ mobileNo: req.body.mobileNo });
+            }
+            // verification_otp = await db['user'].findOne({ mobileNo: req.body.mobileNo });
+            if (otp && verification_otp && verification_otp.verification_otp) {
+                console.log(otp, verification_otp.verification_otp)
+                if (JSON.parse(otp) == verification_otp.verification_otp) {
+                    let userDetails = {
+                        id: verification_otp.id,
+                        mobileNo: verification_otp.mobileNo,
+                        full_name: verification_otp.full_name,
+                        lat: verification_otp.lat,
+                        long: verification_otp.long,
+                        bus_number: verification_otp.bus_number,
+                        school_code: verification_otp.school_code,
+                        ...createToken(verification_otp.id, verification_otp.role)
+                    }
+                    callback(200, "Login Successfull", userDetails)
+                } else {
+                    callback(400, "Invalid OTP", {})
+                }
+            } else {
+                callback(404, "Invalid OTP")
+            }
+        } catch (error) {
+            console.log("Error in verify otp ", error);
+            callback(500, error.message, error);
+        }
+    },
 }

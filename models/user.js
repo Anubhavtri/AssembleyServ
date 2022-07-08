@@ -46,6 +46,10 @@ const UserSchema = Schema({
         type: Boolean,
         default: false
     },
+    verification_otp: {
+        type: String,
+        default: ""
+    },
     created_at: {
         type: Date,
         default: Date.now

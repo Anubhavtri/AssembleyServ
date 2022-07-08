@@ -23,10 +23,24 @@ module.exports = (router, app) => {
             })
         })
 
+    router.route('/verify-otp')
+        .post( (req, res) => {
+            authController.verifyOTP(req, (status, message, data) => {
+                res.status(status).json({ message: message, data: data });
+            })
+        })
+
+    router.route('/login-with-otp')
+        .post( (req, res) => {
+            authController.loginWithOTP(req, (status, message, data) => {
+                res.status(status).json({ message: message, data: data });
+            })
+        })
+
     router.route('/school-login')
         .post((req, res) => {
-            console.log("try to login")
-            authController.login(req, (status, message, data) => {
+            console.log("school login")
+            authController.schoolLogin(req, (status, message, data) => {
                 res.status(status).json({ message: message, data: data });
             })
         })
@@ -83,4 +97,11 @@ module.exports = (router, app) => {
                 res.status(status).json({ message: message, data: data });
             })
         })
+
+    router.route('/profile/:userid')
+        .put(auth, (req, res) => {
+            authController.updateProfile(req, (status, message, data) => {
+                res.status(status).json({ message: message, data: data });
+            })
+        })    
 }

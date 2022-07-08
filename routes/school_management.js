@@ -16,6 +16,13 @@ module.exports = (router, app) => {
             })
         })
 
+    router.route('/feeds/:feedid')
+        .put(auth, (req, res) => {
+            managementController.updateFeeds(req, (status, message, data) => {
+                res.status(status).json({ message: message, data: data });
+            })
+        })
+
     router.route('/add-view')
         .post(auth, (req, res) => {
             managementController.addFeedView(req, (status, message, data) => {
@@ -29,4 +36,13 @@ module.exports = (router, app) => {
                 res.status(status).json({ message: message, data: data });
             })
         })
+
+    router.route('/comment')
+        .post(auth, (req, res) => {
+            managementController.addComments(req, (status, message, data) => {
+                res.status(status).json({ message: message, data: data });
+            })
+        })
+
+
 }

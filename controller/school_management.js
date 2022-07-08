@@ -16,6 +16,20 @@ module.exports = {
             callback(500, error.message, error);
         }
     },
+    updateFeeds: async (req, callback) => {
+        try {
+            db['feeds'].findByIdAndUpdate(req.params.feedid, req.body)
+                .then(user => {
+                    callback(200, "Feed updated sucessfully")
+                })
+                .catch(error => {
+                    callback(500, error.message, error)
+                })
+        } catch (error) {
+            console.error(error);
+            callback(500, error.message, error);
+        }
+    },
     getFeeds: async (req, callback) => {
         try {
             console.log(req.query)
@@ -55,6 +69,53 @@ module.exports = {
                     callback(200, "Feed Liked")
                 })
                 .catch(error => {
+                    callback(500, error.message, error)
+                })
+        } catch (error) {
+            console.error(error);
+            callback(500, error.message, error);
+        }
+    },
+    removeFeedLike: async (req, callback) => {
+        try {
+            db['feeds'].findByIdAndUpdate(req.body.feedId, { $inc: { like_count: 1 } })
+                .then(user => {
+                    callback(200, "Removed")
+                })
+                .catch(error => {
+                    callback(500, error.message, error)
+                })
+        } catch (error) {
+            console.error(error);
+            callback(500, error.message, error);
+        }
+    },
+
+    addComments: async (req, callback) => {
+        try {
+            // console.log("Body : ", {
+            //     $push: {
+            //         comments: {
+            //             comment: req.body.comment,
+            //             userId: req.user,
+            //             feedId: req.body.feedId
+            //         }
+            //     }
+            // })
+            // let data = { comment: req.body.comment }
+            db['feeds'].findByIdAndUpdate(req.body.feedId, {
+                $push: { "comments": {
+                    comment: req.body.comment,
+                    userId: req.user,
+                    feedId: req.body.feedId
+                } }
+            })
+                .then((user) => {
+                    console.log(user)
+                    callback(200, "Comment Added")
+                })
+                .catch(error => {
+                    console.log("error comment : ", error)
                     callback(500, error.message, error)
                 })
         } catch (error) {
