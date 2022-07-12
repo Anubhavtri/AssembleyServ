@@ -34,13 +34,24 @@ module.exports = {
         try {
             console.log(req.query)
             let feeds = await db['feeds'].find({ schoolId: req.query.schoolId })
-                .populate({
+                .populate([{
                     path: 'schoolId', select: {
                         "school_code": 1,
                         "school_name": 1,
                         "school_address": 1
                     }
-                })
+                }, {
+                    path: 'comments.userId', select: {
+                        _id: 1,
+                        full_name: 1,
+                        mobileNo: 1,
+                        role: 1,
+                        lat: 1,
+                        long: 1,
+                        bus_number: 1,
+                        school_code: 1
+                    }
+                }])
             callback(200, "Feeds ", feeds);
         } catch (error) {
             console.error(error);

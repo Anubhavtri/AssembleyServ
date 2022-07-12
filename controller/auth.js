@@ -129,6 +129,15 @@ module.exports = {
                                 long: userEmail.long,
                                 bus_number: userEmail.bus_number,
                                 school_code: userEmail.school_code,
+                                school: await db['school'].findOne({ school_code: userEmail.school_code }).select({
+                                    _id: 1,
+                                    mobileNo: 1,
+                                    role: 1,
+                                    school_name: 1,
+                                    school_code: 1,
+                                    school_address: 1,
+                                    is_active: 1
+                                }),
                                 ...createToken(userEmail.id, userEmail.role)
                             }
                             callback(200, "Login Successfull", userDetails)
