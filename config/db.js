@@ -27,6 +27,7 @@ const school = require('../models/school');
 const vehicle = require('../models/vehicle');
 const school_vehicle = require('../models/school_vehicle');
 const feeds = require('../models/feeds');
+const comment = require('../models/comment')
 
 mongoose.Promise = global.Promise;
 module.exports.db = db;
@@ -38,5 +39,6 @@ module.exports = {
     school,
     vehicle,
     school_vehicle,
-    feeds
+    feeds,
+    comment
 }

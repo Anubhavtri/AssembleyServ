@@ -50,6 +50,10 @@ const UserSchema = Schema({
         type: String,
         default: ""
     },
+    profile_updated: {
+        type: Boolean,
+        default: false
+    }, 
     created_at: {
         type: Date,
         default: Date.now

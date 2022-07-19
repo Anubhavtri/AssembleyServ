@@ -14,6 +14,7 @@ module.exports = async function (req, res, next) {
         const access_token = await db['access_token'].findOne({ token: token });
         if (access_token) {
             req.user = access_token.userId;
+            req.role = access_token.role;
             next();
         } else {
             res.status(402).send("Access denied. Token Expired.");

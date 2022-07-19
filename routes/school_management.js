@@ -23,6 +23,13 @@ module.exports = (router, app) => {
             })
         })
 
+    router.route('/delete-feed')
+        .delete(auth, (req, res) => {
+            managementController.deleteFeed(req, (status, message, data) => {
+                res.status(status).json({ message: message, data: data });
+            })
+        })
+
     router.route('/add-view')
         .post(auth, (req, res) => {
             managementController.addFeedView(req, (status, message, data) => {

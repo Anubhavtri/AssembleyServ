@@ -9,6 +9,10 @@ const CommentSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'User'
     },
+    schoolId: {
+        type: Schema.Types.ObjectId,
+        ref: 'School'
+    },
     feedId:{
         type: Schema.Types.ObjectId,
         ref: 'Feeds'
@@ -19,9 +23,9 @@ const CommentSchema = new Schema({
     }
 });
 
-
-const Comment = mongoose.model('Comment', CommentSchema);
-module.exports = {
-    Comment,
-    CommentSchema
-}
+const comment = module.exports = mongoose.model('Comment', CommentSchema);
+// const comment = mongoose.model('Comment', CommentSchema);
+// module.exports = {
+//     comment,
+//     CommentSchema
+// }

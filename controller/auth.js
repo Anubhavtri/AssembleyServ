@@ -206,36 +206,16 @@ module.exports = {
         try {
             let user = req.body;
 
-            if (user.mobileNo) {
-                console.log(user.mobileNo);
-                var mobileValid = mobileNumberValidation(user.mobileNo);
-                if (mobileValid != true) {
-                    callback(400, mobileValid);
-                } else {
-                    let userExist = await db['school'].findOne({ mobileNo: user.mobileNo, school_code: user.school_code })
-                    if (userExist && userExist.mobileNo == user.mobileNo) {
-                        callback(400, 'School Already Exists');
-                    } else {
-
-                        let hashPassword = '';
-                        hashPassword = await bcrypt.hash(user.password, bs.saltRounds);
-
-                        const newUser = new db['school'](req.body);
-                        newUser.password = hashPassword;
-                        // newUser.email = user.email.toLowerCase()
-                        newUser.save()
-                            .then(async (userDetails) => {
-                                callback(200, 'Registration Successfull', { id: userDetails.id, mobileNo: userDetails.mobileNo, school_name: userDetails.school_name, school_address: userDetails.school_address, school_code: userDetails.school_code, is_active: userDetails.is_active, platform: userDetails.platform, device_token: userDetails.device_token, ...createToken(userDetails.id, userDetails.role) });
-                            })
-                            .catch(err => {
-                                console.log(err);
-                                callback(500, 'error in saving user details');
-                            });
-                    }
-                }
-            } else {
-                callback(500, 'Please enter a valid mobile number');
-            }
+            const newSchool = new db['school'](req.body);
+            // newSchool.email = user.email.toLowerCase()
+            newSchool.save()
+                .then(async (userDetails) => {
+                    callback(200, 'School Added',);
+                })
+                .catch(err => {
+                    console.log(err);
+                    callback(500, 'error in saving School details');
+                });
         } catch (error) {
             console.log(error);
             callback(500, error.message, error);
@@ -315,7 +295,7 @@ module.exports = {
     },
     updateProfile: async (req, callback) => {
         try {
-            db['user'].findByIdAndUpdate(req.params.userid, req.body)
+            db['user'].findByIdAndUpdate(req.params.userid, { ...req.body, profile_updated: true })
                 .then(user => {
                     callback(200, "Profile updated sucessfully")
                 })
@@ -329,7 +309,10 @@ module.exports = {
     },
     getLatLong: async (req, callback) => {
         try {
-            let user = await db['user'].findById(req.params.userid);
+            let user = await db['user'].findById(req.params.userid).select({
+                lat: 1, 
+                long: 1
+            });
             callback(200, "User Lat/Long", user);
         } catch (error) {
             console.error(error);
@@ -370,7 +353,7 @@ module.exports = {
                 role: 2
             }
 
-            let users = await db['user'].find(query);
+            let users = await db['user'].find(query).select('-password ');
 
             callback(200, "Drivers", users);
         } catch (error) {
@@ -556,27 +539,15 @@ module.exports = {
         try {
             let user = req.body;
             if (user.mobileNo) {
-                if (user.role == 3) {
-                    otpUser = await db['school'].findOne({ mobileNo: req.body.mobileNo });
-                } else {
-                    otpUser = await db['user'].findOne({ mobileNo: req.body.mobileNo });
-                }
-
+                otpUser = await db['user'].findOne({ mobileNo: user.mobileNo, role: user.role });
                 if (otpUser) {
                     // let otp = Math.floor(1000 + Math.random() * 9000)
 
                     let otp = 5005;
                     let loginOtp = ""
-                    if (user.role == 3) {
-                        loginOtp = await db['school'].findByIdAndUpdate(otpUser.id, {
-                            verification_otp: otp
-                        })
-                    } else {
-                        loginOtp = await db['user'].findByIdAndUpdate(otpUser.id, {
-                            verification_otp: otp
-                        })
-                    }
-
+                    loginOtp = await db['user'].findByIdAndUpdate(otpUser.id, {
+                        verification_otp: otp
+                    })
 
                     // console.log(loginOtp)
                     console.log(otp)
@@ -585,7 +556,17 @@ module.exports = {
                     // console.log(sendSms.data)
                     callback(200, "OTP Sent", otp)
                 } else {
-                    callback(404, "No user found")
+                    // let otp = Math.floor(1000 + Math.random() * 9000)
+
+                    let otp = 5005;
+                    let loginOtp = ""
+                    const newUser = new db['user']({
+                        mobileNo: user.mobileNo,
+                        verification_otp: otp,
+                        role: user.role
+                    });
+                    await newUser.save()
+                    callback(200, "Registered and OTP Sent", otp)
                 }
             } else {
                 callback(400, "Invalid Mobile Number")
@@ -600,26 +581,32 @@ module.exports = {
             let verification_otp = null;
             let otp = req.body.login_otp;
 
-            if (req.body.role == 3) {
-                verification_otp = await db['school'].findOne({ mobileNo: req.body.mobileNo });
-            } else {
-                verification_otp = await db['user'].findOne({ mobileNo: req.body.mobileNo });
-            }
-            // verification_otp = await db['user'].findOne({ mobileNo: req.body.mobileNo });
+
+            verification_otp = await db['user'].findOne({ mobileNo: req.body.mobileNo, role: req.body.role });
+
+            console.log(verification_otp)
+
             if (otp && verification_otp && verification_otp.verification_otp) {
                 console.log(otp, verification_otp.verification_otp)
                 if (JSON.parse(otp) == verification_otp.verification_otp) {
                     let userDetails = {
-                        id: verification_otp.id,
-                        mobileNo: verification_otp.mobileNo,
-                        full_name: verification_otp.full_name,
-                        lat: verification_otp.lat,
-                        long: verification_otp.long,
-                        bus_number: verification_otp.bus_number,
-                        school_code: verification_otp.school_code,
+                        "_id": verification_otp.id,
+                        "full_name": verification_otp.full_name,
+                        "mobileNo": verification_otp.mobileNo,
+                        "role": verification_otp.role,
+                        "lat": verification_otp.lat,
+                        "long": verification_otp.long,
+                        "device_token": verification_otp.device_token,
+                        "platform": verification_otp.platform,
+                        "bus_number": verification_otp.bus_number,
+                        "school_code": verification_otp.school_code,
+                        "isSessionActive": verification_otp.isSessionActive,
+                        "profile_updated": verification_otp.profile_updated,
+                        "created_at": verification_otp.created_at,
                         ...createToken(verification_otp.id, verification_otp.role)
                     }
                     callback(200, "Login Successfull", userDetails)
+
                 } else {
                     callback(400, "Invalid OTP", {})
                 }
