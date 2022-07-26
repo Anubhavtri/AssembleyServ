@@ -24,8 +24,13 @@ module.exports = {
 
     deleteFeed: async (req, callback) => {
         try {
-            let deleteFeed = await db['feeds'].findByIdAndDelete(req.body.feedId)
-            callback(200, "Feed Deleted", {})
+            let feedByUser = await db['feeds'].findOne({ id: req.body.feedId, userId: req.user })
+            if (feedByUser) {
+                let deleteFeed = await db['feeds'].findByIdAndDelete(req.body.feedId)
+                callback(200, "Feed Deleted", {})
+            } else {
+                callback(400, "User is not allowed to delete the feed", {})
+            }
         } catch (error) {
             console.error(error);
             callback(500, error.message, error);
@@ -105,7 +110,18 @@ module.exports = {
                             school_address: 1,
                             is_active: 1
                         }
-                    }])
+                    }]).lean()
+            for (let feed of feeds) {
+                let isLiked = await db['likes'].findOne({ feedId: feed._id, userId: req.user })
+                console.log(isLiked)
+                if (isLiked) {
+                    feed['isLikedByUser'] = true
+                } else {
+                    feed['isLikedByUser'] = false
+                }
+
+
+            }
             callback(200, "Feeds ", feeds);
         } catch (error) {
             console.error(error);
@@ -131,13 +147,26 @@ module.exports = {
 
     addFeedLike: async (req, callback) => {
         try {
-            db['feeds'].findByIdAndUpdate(req.body.feedId, { $inc: { like_count: 1 } })
-                .then(user => {
-                    callback(200, "Feed Liked")
+            let feedLiked = await db['likes'].findOne({
+                feedId: req.body.feedId,
+                userId: req.user
+            })
+            if (feedLiked) {
+                callback(200, "Already Liked")
+            } else {
+                db['likes'].create({
+                    feedId: req.body.feedId,
+                    userId: req.user
                 })
-                .catch(error => {
-                    callback(500, error.message, error)
-                })
+                db['feeds'].findByIdAndUpdate(req.body.feedId, { $inc: { like_count: 1 } })
+                    .then(user => {
+                        callback(200, "Feed Liked")
+                    })
+                    .catch(error => {
+                        callback(500, error.message, error)
+                    })
+            }
+
         } catch (error) {
             console.error(error);
             callback(500, error.message, error);
@@ -146,13 +175,24 @@ module.exports = {
 
     removeFeedLike: async (req, callback) => {
         try {
-            db['feeds'].findByIdAndUpdate(req.body.feedId, { $inc: { like_count: 1 } })
-                .then(user => {
-                    callback(200, "Removed")
-                })
-                .catch(error => {
-                    callback(500, error.message, error)
-                })
+            let feedLiked = await db['likes'].findOne({
+                feedId: req.body.feedId,
+                userId: req.user
+            })
+            if (feedLiked) {
+                await feedLiked.delete();
+                db['feeds'].findByIdAndUpdate(req.body.feedId, { $inc: { like_count: -1 } })
+                    .then(user => {
+                        callback(200, "Removed")
+                    })
+                    .catch(error => {
+                        callback(500, error.message, error)
+                    })
+
+            } else {
+
+                callback(200, "You haven't liked")
+            }
         } catch (error) {
             console.error(error);
             callback(500, error.message, error);

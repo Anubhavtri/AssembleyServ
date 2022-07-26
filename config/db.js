@@ -28,6 +28,7 @@ const vehicle = require('../models/vehicle');
 const school_vehicle = require('../models/school_vehicle');
 const feeds = require('../models/feeds');
 const comment = require('../models/comment')
+const likes = require('../models/feed_likes')
 
 mongoose.Promise = global.Promise;
 module.exports.db = db;
@@ -40,5 +41,6 @@ module.exports = {
     vehicle,
     school_vehicle,
     feeds,
-    comment
+    comment,
+    likes
 }

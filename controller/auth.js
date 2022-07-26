@@ -7,7 +7,7 @@ const BcryptSalt = require('bcrypt-salt');
 const bs = new BcryptSalt();
 const crypto = require('crypto');
 const Role = require('../config/constant.js').Role
-
+const { request } = require('gaxios');
 
 createAccessToken = async (data, callback) => {
     try {
@@ -310,7 +310,7 @@ module.exports = {
     getLatLong: async (req, callback) => {
         try {
             let user = await db['user'].findById(req.params.userid).select({
-                lat: 1, 
+                lat: 1,
                 long: 1
             });
             callback(200, "User Lat/Long", user);
@@ -541,25 +541,33 @@ module.exports = {
             if (user.mobileNo) {
                 otpUser = await db['user'].findOne({ mobileNo: user.mobileNo, role: user.role });
                 if (otpUser) {
-                    // let otp = Math.floor(1000 + Math.random() * 9000)
+                    let otp = Math.floor(1000 + Math.random() * 9000)
 
-                    let otp = 5005;
+                    // let otp = 5005;
                     let loginOtp = ""
                     loginOtp = await db['user'].findByIdAndUpdate(otpUser.id, {
                         verification_otp: otp
                     })
+                    try {
+                        const res = await request({
+                            url: `https://2factor.in/API/V1/a7ff003e-0008-11ed-9c12-0200cd936042/SMS/${user.mobileNo}/${otp}/OTP Verification`
+                        });
+                    } catch (error) {
 
-                    // console.log(loginOtp)
+                    }
+
+                    // console.log(res)
                     console.log(otp)
                     // let sendSms = await textlocalComplete.sendSms('N2E2Yjc5Mzc3MTcwNjY3MzMxNzU1YTc4NDc1NzRhMzA=', req.body.mobileNo, 'GoodXI',
                     //     `Dear User, Your OTP for login to GoodX is ${otp}. Valid for 10 minutes. Please do not share this OTP. Regards, GoodX Team`);
                     // console.log(sendSms.data)
-                    callback(200, "OTP Sent", otp)
+                    callback(200, "OTP Sent", "")
                 } else {
                     // let otp = Math.floor(1000 + Math.random() * 9000)
 
                     let otp = 5005;
                     let loginOtp = ""
+
                     const newUser = new db['user']({
                         mobileNo: user.mobileNo,
                         verification_otp: otp,

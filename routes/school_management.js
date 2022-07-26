@@ -44,6 +44,13 @@ module.exports = (router, app) => {
             })
         })
 
+    router.route('/remove-like')
+        .post(auth, (req, res) => {
+            managementController.removeFeedLike(req, (status, message, data) => {
+                res.status(status).json({ message: message, data: data });
+            })
+        })
+
     router.route('/comment')
         .post(auth, (req, res) => {
             managementController.addComments(req, (status, message, data) => {
