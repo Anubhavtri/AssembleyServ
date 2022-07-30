@@ -550,7 +550,7 @@ module.exports = {
                     })
                     try {
                         const res = await request({
-                            url: `https://2factor.in/API/V1/a7ff003e-0008-11ed-9c12-0200cd936042/SMS/${user.mobileNo}/${otp}/OTP Verification`
+                            url: `https://2factor.in/API/V1/a7ff003e-0008-11ed-9c12-0200cd936042/SMS/${user.mobileNo}/${otp}/OTP%20Verification`
                         });
                     } catch (error) {
 

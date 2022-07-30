@@ -25,6 +25,8 @@ module.exports = {
     deleteFeed: async (req, callback) => {
         try {
             let feedByUser = await db['feeds'].findOne({ id: req.body.feedId, userId: req.user })
+            console.log("feed id and user id ", req.body.feedId, req.user)
+            console.log("Title of feed ", feedByUser?.title)
             if (feedByUser) {
                 let deleteFeed = await db['feeds'].findByIdAndDelete(req.body.feedId)
                 callback(200, "Feed Deleted", {})
