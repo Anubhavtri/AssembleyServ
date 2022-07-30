@@ -24,11 +24,10 @@ module.exports = {
 
     deleteFeed: async (req, callback) => {
         try {
-            console.log(req.body, req.query)
+            
             if (req.body.feedId) {
                 let feedByUser = await db['feeds'].findOne({ id: req.body.feedId, userId: req.user })
-                console.log("feed id and user id ", req.body.feedId, req.user)
-                console.log("Title of feed ", feedByUser?.title)
+                
                 if (feedByUser) {
                     let deleteFeed = await db['feeds'].findByIdAndDelete(req.body.feedId)
                     callback(200, "Feed Deleted", {})
@@ -36,7 +35,7 @@ module.exports = {
                     callback(400, "User is not allowed to delete the feed", {})
                 }
             } else {
-                callback(200, "Feed Deleted", {})
+                callback(200, "Feed Id (feedId) is not present", {})
             }
 
         } catch (error) {
