@@ -57,6 +57,11 @@ module.exports = (router, app) => {
                 res.status(status).json({ message: message, data: data });
             })
         })
+        .delete(auth, (req, res) => {
+            managementController.deleteComments(req, (status, message, data) => {
+                res.status(status).json({ message: message, data: data });
+            })
+        })
 
 
 }

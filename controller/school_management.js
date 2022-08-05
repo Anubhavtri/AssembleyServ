@@ -24,10 +24,10 @@ module.exports = {
 
     deleteFeed: async (req, callback) => {
         try {
-            
+
             if (req.body.feedId) {
                 let feedByUser = await db['feeds'].findOne({ id: req.body.feedId, userId: req.user })
-                
+
                 if (feedByUser) {
                     let deleteFeed = await db['feeds'].findByIdAndDelete(req.body.feedId)
                     callback(200, "Feed Deleted", {})
@@ -228,6 +228,25 @@ module.exports = {
                     console.log("error comment : ", error)
                     callback(500, error.message, error)
                 })
+        } catch (error) {
+            console.error(error);
+            callback(500, error.message, error);
+        }
+    },
+
+    deleteComments: async (req, callback) => {
+        try {
+            let comment = req.body.commentId
+            if (comment && req.body.feedId) {
+                let newComment = db['comment'].findByIdAndRemove(comment)
+                let feed = await db['feeds'].findByIdAndUpdate(req.body.feedId, {
+                    $pull: { "comments": comment }
+                })
+                
+                callback(200, "Comment Removed");
+            } else {
+                callback(400, "comment id or feedid missing");
+            }
         } catch (error) {
             console.error(error);
             callback(500, error.message, error);
