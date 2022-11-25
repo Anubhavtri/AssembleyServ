@@ -8,6 +8,8 @@ const bs = new BcryptSalt();
 const crypto = require('crypto');
 const Role = require('../config/constant.js').Role
 const { request } = require('gaxios');
+const contant = require('../config/constant');
+const constant = require('../config/constant');
 
 createAccessToken = async (data, callback) => {
     try {
@@ -550,7 +552,7 @@ module.exports = {
                     })
                     try {
                         const res = await request({
-                            url: `https://2factor.in/API/V1/a7ff003e-0008-11ed-9c12-0200cd936042/SMS/${user.mobileNo}/${otp}/OTP%20Verification`
+                            url: `https://2factor.in/API/V1/${constant.message_key.Key}/SMS/${user.mobileNo}/${otp}/OTP%20Verification`
                         });
                     } catch (error) {
 

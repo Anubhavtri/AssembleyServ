@@ -10,5 +10,8 @@ module.exports = {
         "Region": "ap-south-1",
         "Bucket": "doodle-care-dev",
     },
+    message_key: {
+        Key: "a7ff003e-0008-11ed-9c12-0200cd936042"
+    }
     
 }
