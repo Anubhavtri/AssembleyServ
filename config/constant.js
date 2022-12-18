@@ -11,7 +11,7 @@ module.exports = {
         "Bucket": "doodle-care-dev",
     },
     message_key: {
-        Key: "a7ff003e-0008-11ed-9c12-0200cd936042"
+        Key: "adba5b27-64f3-11ed-9c12-0200cd936042"
     }
     
 }
